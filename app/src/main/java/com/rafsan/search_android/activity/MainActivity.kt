@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rafsan.search_android.data.local_db.GithubData
 import com.rafsan.search_android.pages.detailPage
 import com.rafsan.search_android.pages.searchPage
 import dagger.hilt.android.AndroidEntryPoint

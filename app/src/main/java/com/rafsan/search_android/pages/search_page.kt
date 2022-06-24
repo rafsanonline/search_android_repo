@@ -2,6 +2,7 @@ package com.rafsan.search_android.pages
 
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,56 +29,60 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rafsan.search_android.activity.MainViewModel
+import com.rafsan.search_android.data.local_db.GithubData
 
 
 @Composable
 fun searchPage(navController: NavController, viewModel: MainViewModel) {
 
-    var imageSource by remember {
-        mutableStateOf(0)
-    }
+    val data : List<GithubData> by viewModel.database.githubDao().repoList().collectAsState(initial = emptyList())
 
     Scaffold(backgroundColor = Color.White) {
 
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(all = 20.dp)) {
-            searchBar()
+            searchBar(viewModel, data)
 
-            LazyColumn(modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 20.dp)) {
-                items(viewModel.data) { item ->
+            if (data.isNotEmpty()) {
+                LazyColumn(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 20.dp)) {
+                    items(data) { item ->
 
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start, modifier = Modifier
-                        .fillMaxWidth()
-                        .height(65.dp)
-                        .background(color = Color(0xffEAF0EC), shape = RoundedCornerShape(20.dp))) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start, modifier = Modifier
+                            .fillMaxWidth()
+                            .height(65.dp)
+                            .background(color = Color(0xffEAF0EC),
+                                shape = RoundedCornerShape(20.dp))) {
 
-                        Icon(Icons.Filled.SupervisedUserCircle,
-                            contentDescription = "Avatar",
-                            modifier = Modifier
-                                .size(60.dp)
-                                .padding(start = 15.dp)
-                                .clip(
-                                    RoundedCornerShape(100)))
-                        
-                        Spacer(modifier = Modifier.width(15.dp))
+                            Icon(Icons.Filled.SupervisedUserCircle,
+                                contentDescription = "Avatar",
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .padding(start = 15.dp)
+                                    .clip(
+                                        RoundedCornerShape(100)))
 
-                        
-                        Column {
+                            Spacer(modifier = Modifier.width(15.dp))
 
-                            Text(text = "Demo Name", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(text = "Demo Full Name", fontSize = 13.sp, fontWeight = FontWeight.Normal, color = Color.Gray)
+
+                            Column {
+
+                                Text(text = "Demo Name", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(text = "Demo Full Name", fontSize = 13.sp, fontWeight = FontWeight.Normal, color = Color.Gray)
+
+                            }
 
                         }
 
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
-
-                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
+
+
 
         }
     }
@@ -86,7 +91,7 @@ fun searchPage(navController: NavController, viewModel: MainViewModel) {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun searchBar() {
+fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
     var searchText by remember { mutableStateOf(TextFieldValue("")) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -127,7 +132,10 @@ fun searchBar() {
 
             Box(modifier = Modifier
                 .background(Color(0xffDAE3DD), shape = RoundedCornerShape(100))
-                .size(40.dp)) {
+                .size(40.dp)
+                .clickable {
+                    viewModel.apiSearchRepo(searchByDate = false, searchByStar = false)
+                }) {
                 Icon(Icons.Filled.Search,
                     contentDescription = "Search",
                     tint = Color.Black,

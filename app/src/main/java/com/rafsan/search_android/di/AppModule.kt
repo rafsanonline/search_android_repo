@@ -1,7 +1,10 @@
 package com.rafsan.search_android.di
 
+import android.app.Application
 import android.content.Context
+import androidx.room.Room
 import com.rafsan.search_android.BuildConfig
+import com.rafsan.search_android.data.local_db.GithubDatabase
 import com.rafsan.search_android.data.network.IApiService
 import com.rafsan.search_android.data.preference.PreferencesHelper
 import dagger.Module
@@ -64,6 +67,12 @@ object AppModule {
             .client(okHttpClient)
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(app: Application) : GithubDatabase =
+        Room.databaseBuilder(app, GithubDatabase::class.java, "github_db")
+            .build()
 
     @Provides
     @Singleton
