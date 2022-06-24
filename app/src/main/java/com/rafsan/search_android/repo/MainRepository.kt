@@ -1,6 +1,5 @@
 package com.rafsan.search_android.repo
 
-import androidx.paging.ExperimentalPagingApi
 import com.rafsan.search_android.data.network.IApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

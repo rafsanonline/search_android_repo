@@ -78,7 +78,8 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
             "-Xopt-in=kotlin.time.ExperimentalTime",
             "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi",
-            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi"
+            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-Xopt-in=androidx.compose.paging.ExperimentalPagingApi"
     ]
 }
 
@@ -100,6 +101,9 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     testImplementation "com.google.truth:truth:1.1.3"
     androidTestImplementation "com.google.truth:truth:1.1.3"
+
+    //Paging Compose
+    implementation "androidx.paging:paging-compose:1.0.0-alpha13"
 
 
     
