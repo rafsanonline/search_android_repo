@@ -22,11 +22,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalPagingApi::class)
     private val viewModel: MainViewModel by viewModels()
 
-
-    @OptIn(ExperimentalPagingApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -34,7 +31,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalPagingApi::class)
+
     @Composable
     private fun runApplication(viewModel: MainViewModel) {
         val navController = rememberNavController()

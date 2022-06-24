@@ -9,7 +9,6 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-@ExperimentalPagingApi
 class MainRepository @Inject constructor(
     private val apiService: IApiService,
 ) {
