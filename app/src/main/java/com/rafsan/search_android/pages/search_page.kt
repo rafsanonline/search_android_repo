@@ -1,11 +1,15 @@
 package com.rafsan.search_android.pages
 
 
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,73 +24,112 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.room.withTransaction
+import com.rafsan.search_android.R
 import com.rafsan.search_android.activity.MainViewModel
 import com.rafsan.search_android.data.local_db.GithubData
+import com.rafsan.search_android.utils.LoadingView
+import com.skydoves.landscapist.glide.GlideImage
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun searchPage(navController: NavController, viewModel: MainViewModel) {
 
     val data : List<GithubData> by viewModel.database.githubDao().repoList().collectAsState(initial = emptyList())
+    val loader = viewModel.showLoader.collectAsState()
 
-    Scaffold(backgroundColor = Color.White) {
+    Box(modifier = Modifier.background(Color.White)) {
 
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(all = 20.dp)) {
             searchBar(viewModel, data)
-
             if (data.isNotEmpty()) {
                 LazyColumn(modifier = Modifier
                     .fillMaxSize()
                     .padding(top = 20.dp)) {
                     items(data) { item ->
-
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start, modifier = Modifier
-                            .fillMaxWidth()
-                            .height(65.dp)
-                            .background(color = Color(0xffEAF0EC),
-                                shape = RoundedCornerShape(20.dp))) {
-
-                            Icon(Icons.Filled.SupervisedUserCircle,
-                                contentDescription = "Avatar",
-                                modifier = Modifier
-                                    .size(60.dp)
-                                    .padding(start = 15.dp)
-                                    .clip(
-                                        RoundedCornerShape(100)))
-
-                            Spacer(modifier = Modifier.width(15.dp))
-
-
-                            Column {
-
-                                Text(text = "Demo Name", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(text = "Demo Full Name", fontSize = 13.sp, fontWeight = FontWeight.Normal, color = Color.Gray)
-
-                            }
-
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
+                        repoItem(item, navController, viewModel)
                     }
                 }
             }
+        }
 
+        if (data.isEmpty()) {
 
+                Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.align(Alignment.Center)) {
+                    Image(painter = painterResource(id = R.drawable.github_logo), contentDescription = "", modifier = Modifier.size(100.dp
+                    ))
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text("Search Android\n Repositories", textAlign = TextAlign.Center, fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
+                }
 
+        }
+
+        if (loader.value) {
+            LoadingView(modifier = Modifier.align(Alignment.Center))
         }
     }
 
+}
+
+
+@Composable
+fun repoItem(item: GithubData, navController: NavController, viewModel: MainViewModel) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start, modifier = Modifier
+        .fillMaxWidth()
+        .height(65.dp)
+        .background(color = Color(0xffEAF0EC),
+            shape = RoundedCornerShape(20.dp)).clickable {
+                viewModel.detailData = item
+                navController.navigate("details_page")
+        }) {
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+        GlideImage(imageModel = item.avatar, loading = {
+            Icon(Icons.Filled.SupervisedUserCircle,
+                contentDescription = "Avatar",
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape))
+        }, success = { imageState ->
+            imageState.drawable?.toBitmap().let {
+                Image(bitmap = it!!.asImageBitmap(), contentDescription = "Loaded Image", modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape))
+            }
+
+        })
+
+        Spacer(modifier = Modifier.width(15.dp))
+
+
+        Column {
+            Text(text = item.name, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(text = item.fullName, fontSize = 13.sp, fontWeight = FontWeight.Normal, color = Color.Gray)
+
+        }
+
+    }
+
+    Spacer(modifier = Modifier.height(10.dp))
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -94,6 +137,8 @@ fun searchPage(navController: NavController, viewModel: MainViewModel) {
 fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
     var searchText by remember { mutableStateOf(TextFieldValue("")) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    var expanded by remember { mutableStateOf(false) }
+    var context = LocalContext.current
 
 
     Box(Modifier
@@ -134,7 +179,16 @@ fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
                 .background(Color(0xffDAE3DD), shape = RoundedCornerShape(100))
                 .size(40.dp)
                 .clickable {
-                    viewModel.apiSearchRepo(searchByDate = false, searchByStar = false)
+                    if (searchText.text.isNotEmpty()) {
+                        viewModel.preferencesHelper.put("search_text", searchText.text)
+                        viewModel.apiSearchRepo(searchKey = searchText.text,
+                            viewModel.preferencesHelper["sort", ""])
+                    } else {
+                        Toast
+                            .makeText(context, "Search bar is empty!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
                 }) {
                 Icon(Icons.Filled.Search,
                     contentDescription = "Search",
@@ -149,7 +203,66 @@ fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
 
             Box(modifier = Modifier
                 .background(Color(0xffDAE3DD), shape = RoundedCornerShape(100))
-                .size(40.dp)) {
+                .size(40.dp)
+                .clickable {
+                    expanded = true
+
+                }) {
+
+                DropdownMenu(
+                    modifier = Modifier.align(
+                        Alignment.Center),
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    DropdownMenuItem(onClick = {
+                        Log.i("search_data", viewModel.preferencesHelper["search_text", ""])
+                        if (searchText.text.isNotEmpty()) {
+                            expanded = false
+                            getFilteredData(sortType = "date", dataSource = viewModel)
+                        } else if(viewModel.preferencesHelper["search_text", ""].isNotEmpty()){
+                            expanded = false
+                            getFilteredData(sortType = "date", dataSource = viewModel)
+                        } else {
+                            Toast.makeText(context, "Search first before filtering!", Toast.LENGTH_SHORT).show()
+                        }
+                    }) {
+                        Text("Filter by Updated Date", fontWeight = if (viewModel.preferencesHelper["sort", ""] == "date") {FontWeight.Bold}else{FontWeight.Normal})
+                    }
+                    Divider()
+                    DropdownMenuItem(onClick = {
+                        if (searchText.text.isNotEmpty()) {
+                            expanded = false
+                            getFilteredData(sortType = "star", dataSource = viewModel)
+                        } else if(viewModel.preferencesHelper["search_text", ""].isNotEmpty()){
+                            expanded = false
+                            getFilteredData(sortType = "star", dataSource = viewModel)
+                        } else {
+                            Toast.makeText(context, "Search first before filtering!", Toast.LENGTH_SHORT).show()
+                        }
+
+                    }) {
+                        Text("Filter Star Count", fontWeight = if (viewModel.preferencesHelper["sort", ""] == "star") {FontWeight.Bold}else{FontWeight.Normal})
+                    }
+                    Divider()
+                    DropdownMenuItem(onClick = {
+                        expanded = false
+                        viewModel.apply {
+                            clear()
+                            viewModel.hashMap.clear()
+                            preferencesHelper.put("search_text","")
+                            preferencesHelper.put("sort", "")
+                            viewModelScope.launch {
+                                database.withTransaction {
+                                    database.githubDao().deleteAllRepo()
+                                }
+                            }
+                        }
+
+                    }) {
+                        Text("Clear Filter")
+                    }
+                }
                 Icon(Icons.Filled.FilterList,
                     contentDescription = "Search",
                     tint = Color.Black,
@@ -165,6 +278,14 @@ fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
 
     }
 
+
+}
+
+fun getFilteredData(sortType: String, dataSource: MainViewModel) {
+    dataSource.apply {
+        preferencesHelper.put("sort", sortType)
+        apiSearchRepo(searchKey = preferencesHelper["search_text", ""], sortBy = preferencesHelper["sort", ""])
+    }
 
 }
 

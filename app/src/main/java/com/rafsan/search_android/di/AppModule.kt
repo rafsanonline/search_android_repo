@@ -10,6 +10,7 @@ import com.rafsan.search_android.data.preference.PreferencesHelper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.reactivex.schedulers.Schedulers
@@ -68,6 +69,13 @@ object AppModule {
             .build()
     }
 
+
+    @Provides
+    @Singleton
+    fun providePreference(app: Application): PreferencesHelper {
+        return PreferencesHelper(app)
+    }
+
     @Provides
     @Singleton
     fun provideDatabase(app: Application) : GithubDatabase =
@@ -81,10 +89,5 @@ object AppModule {
     }
 
 
-    @Provides
-    @Singleton
-    fun providePreference(@ApplicationContext context: Context): PreferencesHelper {
-        return PreferencesHelper(context)
-    }
 
 }

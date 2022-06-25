@@ -21,7 +21,7 @@ fun LoadingView(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(color = Color.Black)
+        CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(70.dp))
     }
 }
 

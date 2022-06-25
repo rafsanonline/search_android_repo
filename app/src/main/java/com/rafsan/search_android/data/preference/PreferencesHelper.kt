@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 
 class PreferencesHelper(context: Context) {
     private val preferencesHelper: SharedPreferences
-    private val sslPref = "ssl-prefs"
+    private val sslPref = "rafsan-prefs"
 
     init {
         preferencesHelper = context.getSharedPreferences(sslPref, Context.MODE_PRIVATE)
@@ -50,5 +50,7 @@ class PreferencesHelper(context: Context) {
     operator fun get(key: String, defaultValue: Long): Long {
         return preferencesHelper.getLong(key, defaultValue)
     }
+
+
 
 }
