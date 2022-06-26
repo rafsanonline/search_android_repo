@@ -180,10 +180,10 @@ fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
                 .size(40.dp)
                 .clickable {
                     if (searchText.text.trim() == "Android") {
-                        viewModel.preferencesHelper.put("search_text", searchText.text)
-                        viewModel.apiSearchRepo(searchKey = searchText.text,
+                        viewModel.preferencesHelper.put("search_text", searchText.text.trim())
+                        viewModel.apiSearchRepo(searchKey = searchText.text.trim(),
                             viewModel.preferencesHelper["sort", ""])
-                    } else if(searchText.text.isEmpty()) {
+                    } else if(searchText.text.trim().isEmpty()) {
                         Toast
                             .makeText(context, "Search bar is empty!", Toast.LENGTH_SHORT)
                             .show()
@@ -221,7 +221,7 @@ fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
                 ) {
                     DropdownMenuItem(onClick = {
                         Log.i("search_data", viewModel.preferencesHelper["search_text", ""])
-                        if (searchText.text.isNotEmpty()) {
+                        if (searchText.text.trim().isNotEmpty()) {
                             expanded = false
                             getFilteredData(sortType = "date", dataSource = viewModel)
                         } else if(viewModel.preferencesHelper["search_text", ""].isNotEmpty()){
@@ -235,7 +235,7 @@ fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
                     }
                     Divider()
                     DropdownMenuItem(onClick = {
-                        if (searchText.text.isNotEmpty()) {
+                        if (searchText.text.trim().isNotEmpty()) {
                             expanded = false
                             getFilteredData(sortType = "star", dataSource = viewModel)
                         } else if(viewModel.preferencesHelper["search_text", ""].isNotEmpty()){
