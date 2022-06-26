@@ -179,13 +179,17 @@ fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
                 .background(Color(0xffDAE3DD), shape = RoundedCornerShape(100))
                 .size(40.dp)
                 .clickable {
-                    if (searchText.text.isNotEmpty()) {
+                    if (searchText.text.trim() == "Android") {
                         viewModel.preferencesHelper.put("search_text", searchText.text)
                         viewModel.apiSearchRepo(searchKey = searchText.text,
                             viewModel.preferencesHelper["sort", ""])
-                    } else {
+                    } else if(searchText.text.isEmpty()) {
                         Toast
                             .makeText(context, "Search bar is empty!", Toast.LENGTH_SHORT)
+                            .show()
+                    } else {
+                        Toast
+                            .makeText(context, "Search with 'Android' keyword", Toast.LENGTH_SHORT)
                             .show()
                     }
 
@@ -260,7 +264,7 @@ fun searchBar(viewModel: MainViewModel, data: List<GithubData>) {
                         }
 
                     }) {
-                        Text("Clear Filter")
+                        Text("Clear Search")
                     }
                 }
                 Icon(Icons.Filled.FilterList,
