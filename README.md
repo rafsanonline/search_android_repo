@@ -2,7 +2,7 @@
 
 Search Android
 
-This is a simple app for fetching a list of repositories from the Github server. A user can simply search android related repositories by entering "Android" keyword.
+This is a simple app for fetching a list of repositories from the Github server. A user can simply search android related repositories by entering the 'Android' keyword.
 
 ## App structure
 
