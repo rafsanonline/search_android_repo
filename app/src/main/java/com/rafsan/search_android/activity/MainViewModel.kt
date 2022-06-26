@@ -58,7 +58,7 @@ class MainViewModel @Inject constructor(
                                 val repo = GithubData()
                                 repo.name = item?.name.toString()
                                 repo.fullName = item?.fullName.toString()
-                                repo.description = item?.description.toString()
+                                repo.description = item?.description?: "No details found"
                                 repo.avatar = item?.owner?.avatarUrl.toString()
                                 repo.createdAt = item?.updatedAt.toString()
                                 repo.stars = item?.stargazersCount.toString()

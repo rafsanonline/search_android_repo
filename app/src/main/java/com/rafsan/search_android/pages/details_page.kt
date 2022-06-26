@@ -28,6 +28,7 @@ import com.rafsan.search_android.activity.MainViewModel
 import com.rafsan.search_android.data.local_db.GithubDatabase
 import com.rafsan.search_android.data.preference.PreferencesHelper
 import com.skydoves.landscapist.glide.GlideImage
+import java.text.SimpleDateFormat
 
 @Composable
 fun detailPage(navController: NavController, viewModel: MainViewModel) {
@@ -81,13 +82,20 @@ fun detailPage(navController: NavController, viewModel: MainViewModel) {
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(text = viewModel.detailData.description, fontWeight = FontWeight.Normal)
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(text = viewModel.detailData.createdAt, fontWeight = FontWeight.Normal)
+                Text(text = "Last updated on: ${formattedDateTime(viewModel.detailData.createdAt).split(" ")[0]}," +
+                        " ${formattedDateTime(viewModel.detailData.createdAt).split(" ")[1]}", fontWeight = FontWeight.Normal)
             }
 
 
         }
 
 }
+}
+
+fun formattedDateTime(createdAt: String): String {
+    val parser =  SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    val formatter = SimpleDateFormat("MM-dd-yy HH:ss")
+    return formatter.format(parser.parse(createdAt))
 }
 
 @Composable
